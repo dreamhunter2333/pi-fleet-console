@@ -75,6 +75,12 @@ export function AppShell() {
   // also fire for tasks finishing in a non-active workspace whose ChatWindow
   // is not mounted. ChatWindow receives the audio callbacks as props.
   const { soundEnabled, onSoundToggle, playDoneSound, unlockAudio, soundEnabledRef } = useAudio();
+  const unlockFeedback = useCallback(() => {
+    unlockAudio();
+    if ("Notification" in window && Notification.permission === "default") {
+      void Notification.requestPermission();
+    }
+  }, [unlockAudio]);
   const notifiedAttentionRequestIdsRef = useRef(new Set<string>());
   const handleBackgroundTaskDone = useCallback(() => {
     if (soundEnabledRef.current) playDoneSound();
@@ -2100,7 +2106,7 @@ export function AppShell() {
               soundEnabled={soundEnabled}
               onSoundToggle={onSoundToggle}
               playDoneSound={playDoneSound}
-              unlockAudio={unlockAudio}
+              unlockAudio={unlockFeedback}
             />
           ) : initialCwdStatus === "validating" ? (
             <div
