@@ -10,6 +10,7 @@ import { workspaceKeyOf } from "@/lib/workspace-memory";
 import { useI18n } from "@/hooks/useI18n";
 import { DirectoryPicker } from "./DirectoryPicker";
 import { FileExplorer, type FileExplorerHandle } from "./FileExplorer";
+import { MachineSelector } from "./MachineSelector";
 
 declare global {
   interface Window {
@@ -1058,6 +1059,8 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
             </button>
           </div>
         </div>
+
+        <MachineSelector />
 
         {/* CWD picker */}
         <div ref={dropdownRef} style={{ position: "relative" }}>
