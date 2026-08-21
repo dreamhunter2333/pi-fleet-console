@@ -36,6 +36,16 @@ export function proxy(request: NextRequest) {
     });
   }
 
+  if (
+    isApiRequest
+    && !request.nextUrl.pathname.startsWith("/api/fleet/")
+    && request.nextUrl.pathname !== "/api/fleet"
+  ) {
+    const target = request.nextUrl.clone();
+    target.pathname = `/api/fleet/proxy${request.nextUrl.pathname.slice(4)}`;
+    return NextResponse.rewrite(target);
+  }
+
   return NextResponse.next();
 }
 

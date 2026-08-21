@@ -61,7 +61,7 @@ function getBrowserEnvironment(): BrowserNotificationEnvironment {
   return {
     createWindowNotification: (title, options) => new Notification(title, options),
     getServiceWorkerRegistration: "serviceWorker" in navigator
-      ? () => navigator.serviceWorker.getRegistration()
+      ? () => navigator.serviceWorker.ready
       : null,
   };
 }
