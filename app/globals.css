@@ -18,7 +18,8 @@
   --font-mono-font: var(--font-mono);
 }
 
-:root {
+:root,
+html[data-theme="default-light"] {
   --bg: #ffffff;
   --bg-panel: #f5f5f5;
   --bg-hover: #eeeeee;
@@ -35,7 +36,7 @@
   --bg-subtle: rgba(0,0,0,0.03);
 }
 
-html.dark {
+html[data-theme="default-dark"] {
   --bg: #1a1a1a;
   --bg-panel: #242424;
   --bg-hover: #2e2e2e;
@@ -50,6 +51,74 @@ html.dark {
   --assistant-bg: #1a1a1a;
   --tool-bg: #1f2937;
   --bg-subtle: rgba(255,255,255,0.04);
+}
+
+html[data-theme="github-light"] {
+  --bg: #ffffff;
+  --bg-panel: #f6f8fa;
+  --bg-hover: #eaeef2;
+  --bg-selected: #ddf4ff;
+  --border: #d0d7de;
+  --text: #1f2328;
+  --text-muted: #656d76;
+  --text-dim: #8c959f;
+  --accent: #0969da;
+  --accent-hover: #0550ae;
+  --user-bg: #ddf4ff;
+  --assistant-bg: #ffffff;
+  --tool-bg: #f6f8fa;
+  --bg-subtle: rgba(31, 35, 40, 0.04);
+}
+
+html[data-theme="github-dark"] {
+  --bg: #0d1117;
+  --bg-panel: #161b22;
+  --bg-hover: #21262d;
+  --bg-selected: #1f2937;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #7d8590;
+  --text-dim: #6e7681;
+  --accent: #2f81f7;
+  --accent-hover: #58a6ff;
+  --user-bg: #13233a;
+  --assistant-bg: #0d1117;
+  --tool-bg: #161b22;
+  --bg-subtle: rgba(230, 237, 243, 0.04);
+}
+
+html[data-theme="one-half-light"] {
+  --bg: #fafafa;
+  --bg-panel: #f0f0f0;
+  --bg-hover: #e5e5e5;
+  --bg-selected: #dbe4ff;
+  --border: #d4d4d4;
+  --text: #383a42;
+  --text-muted: #696c77;
+  --text-dim: #a0a1a7;
+  --accent: #0184bc;
+  --accent-hover: #006fa0;
+  --user-bg: #e7f3f8;
+  --assistant-bg: #fafafa;
+  --tool-bg: #f0f0f0;
+  --bg-subtle: rgba(56, 58, 66, 0.04);
+}
+
+html[data-theme="one-half-dark"] {
+  --bg: #282c34;
+  --bg-panel: #313640;
+  --bg-hover: #373c45;
+  --bg-selected: #474e5d;
+  --border: #454b56;
+  --text: #dcdfe4;
+  --text-muted: #919baa;
+  --text-dim: #5c6370;
+  --accent: #61afef;
+  --accent-hover: #78bdf5;
+  --user-bg: #303c4d;
+  --assistant-bg: #282c34;
+  --tool-bg: #313640;
+  --bg-subtle: rgba(220, 223, 228, 0.04);
 }
 
 .catppuccin-file-icon {

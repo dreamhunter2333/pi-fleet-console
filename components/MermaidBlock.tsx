@@ -2,8 +2,7 @@
 
 import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vs } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { ghcolors, oneDark, oneLight, vs, vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { useTheme } from "@/hooks/useTheme";
 import { useI18n } from "@/hooks/useI18n";
 import { copyText } from "@/lib/clipboard";
@@ -238,7 +237,7 @@ interface CodeBlockProps {
  * every chunk, which is the single most expensive part of streamed rendering.
  */
 export const CodeBlock = memo(function CodeBlock({ code, lang, headerAction, isStreaming }: CodeBlockProps) {
-  const { isDark } = useTheme();
+  const { theme } = useTheme();
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
@@ -279,7 +278,7 @@ export const CodeBlock = memo(function CodeBlock({ code, lang, headerAction, isS
       ) : (
         <SyntaxHighlighter
           language={lang || "text"}
-          style={isDark ? vscDarkPlus : vs}
+          style={theme === "one-half-dark" ? oneDark : theme === "one-half-light" ? oneLight : theme === "github-light" ? ghcolors : theme === "default-light" ? vs : vscDarkPlus}
           showLineNumbers
           lineNumberStyle={{ color: "var(--text-dim)", fontStyle: "normal" }}
           customStyle={{
