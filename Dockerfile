@@ -1,0 +1,27 @@
+FROM oven/bun:1-slim AS dependencies
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN bun install --no-save
+
+FROM oven/bun:1-slim AS builder
+
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    PI_FLEET_STATIC_EXPORT=1
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY . .
+RUN bun run build
+
+FROM openresty/openresty:1.31.1.1-2-alpine
+
+ENV PI_FLEET_CONFIG_FILE=/config/machines.json
+
+COPY gateway/nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
+COPY gateway/fleet.lua /etc/openresty/fleet.lua
+COPY gateway/machines.json /config/machines.json
+COPY --from=builder /app/out /srv
+
+EXPOSE 30141
+
+CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]
