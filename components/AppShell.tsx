@@ -13,7 +13,7 @@ import { SkillsConfig } from "./SkillsConfig";
 import { PluginsConfig } from "./PluginsConfig";
 import { ProjectTrustDialog } from "./ProjectTrustDialog";
 import { BranchNavigator } from "./BranchNavigator";
-import { useTheme } from "@/hooks/useTheme";
+import { THEME_OPTIONS, useTheme } from "@/hooks/useTheme";
 import { useI18n } from "@/hooks/useI18n";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useViewportHeight } from "@/hooks/useViewportHeight";
@@ -52,6 +52,7 @@ import type { SessionStatsInfo } from "@/lib/pi-types";
 import type { FileViewerState } from "@/lib/file-viewer-state";
 
 type SessionCopyField = "file" | "id";
+type TopPanel = "branches" | "system" | "session" | "language" | "theme";
 type AutoNameStatus =
   | { kind: "idle" }
   | { kind: "naming" }
@@ -60,14 +61,13 @@ type AutoNameStatus =
 
 const TOP_BAR_ICON_BUTTON_SIZE = 36;
 const LANGUAGE_MENU_WIDTH = 176;
+const THEME_MENU_WIDTH = 220;
 
 export function AppShell() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [initialNavigation] = useState(() => getInitialNavigation(searchParams));
-  const { preference, toggleTheme } = useTheme();
-  const themeLabelKey =
-    preference === "light" ? "theme.light" : preference === "dark" ? "theme.dark" : "theme.auto";
+  const { preference, setTheme, isDark } = useTheme();
   const { locale, setLocale, t: translate, supportedLocales } = useI18n();
   const isMobile = useIsMobile();
   useViewportHeight();
@@ -180,6 +180,7 @@ export function AppShell() {
   const topBarRef = useRef<HTMLDivElement>(null);
   const mobileToolbarRef = useRef<HTMLDivElement>(null);
   const languageBtnRef = useRef<HTMLButtonElement>(null);
+  const themeBtnRef = useRef<HTMLButtonElement>(null);
 
   // Branch navigator state — populated by ChatWindow via onBranchDataChange
   const [branchTree, setBranchTree] = useState<SessionTreeNode[]>([]);
@@ -246,11 +247,11 @@ export function AppShell() {
   }, []);
 
   // Single active panel — only one dropdown open at a time
-  const [activeTopPanel, setActiveTopPanel] = useState<"branches" | "system" | "session" | "language" | null>(null);
+  const [activeTopPanel, setActiveTopPanel] = useState<TopPanel | null>(null);
   const [topPanelPos, setTopPanelPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const toggleTopPanel = useCallback((
-    panel: "branches" | "system" | "session" | "language",
+    panel: TopPanel,
     keepMobileToolbarOpen = false,
   ) => {
     if (isMobile) setSidebarOpen(false);
@@ -336,9 +337,11 @@ export function AppShell() {
     if (!activeTopPanel || !topBarRef.current) return;
     const update = () => {
       const topBarRect = topBarRef.current!.getBoundingClientRect();
-      if (activeTopPanel === "language" && !isMobile && languageBtnRef.current) {
-        const buttonRect = languageBtnRef.current.getBoundingClientRect();
-        const width = Math.min(LANGUAGE_MENU_WIDTH, topBarRect.width);
+      const menuButton = activeTopPanel === "language" ? languageBtnRef.current : themeBtnRef.current;
+      if ((activeTopPanel === "language" || activeTopPanel === "theme") && !isMobile && menuButton) {
+        const buttonRect = menuButton.getBoundingClientRect();
+        const menuWidth = activeTopPanel === "language" ? LANGUAGE_MENU_WIDTH : THEME_MENU_WIDTH;
+        const width = Math.min(menuWidth, topBarRect.width);
         const left = Math.min(
           buttonRect.left - 1,
           Math.max(topBarRect.left, topBarRect.right - width),
@@ -352,6 +355,7 @@ export function AppShell() {
     const ro = new ResizeObserver(update);
     ro.observe(topBarRef.current);
     if (languageBtnRef.current) ro.observe(languageBtnRef.current);
+    if (themeBtnRef.current) ro.observe(themeBtnRef.current);
     return () => ro.disconnect();
   }, [activeTopPanel, isMobile]);
 
@@ -993,25 +997,35 @@ export function AppShell() {
 
   const renderThemeButton = (mobile: boolean) => (
     <button
+      ref={themeBtnRef}
       type="button"
-      onClick={(event) => {
-        const rect = event.currentTarget.getBoundingClientRect();
-        toggleTheme({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
-        if (mobile) setMobileToolbarMoreOpen(true);
-      }}
-      title={translate(themeLabelKey)}
-      aria-label={translate(themeLabelKey)}
+      onClick={() => toggleTopPanel("theme", mobile)}
+      title={translate("theme.label")}
+      aria-label={translate("theme.label")}
+      aria-haspopup="menu"
+      aria-expanded={activeTopPanel === "theme"}
+      aria-pressed={activeTopPanel === "theme"}
       style={{
         display: "flex", alignItems: "center", justifyContent: "center",
         width: TOP_BAR_ICON_BUTTON_SIZE, height: TOP_BAR_ICON_BUTTON_SIZE, padding: 0,
-        background: "none", border: "none", borderRight: "1px solid var(--border)",
-        color: "var(--text-muted)", cursor: "pointer", flexShrink: 0, transition: "color 0.12s",
+        background: activeTopPanel === "theme" ? "var(--bg-selected)" : "none",
+        border: "none", borderRight: "1px solid var(--border)",
+        color: activeTopPanel === "theme" ? "var(--text)" : "var(--text-muted)",
+        cursor: "pointer", flexShrink: 0, transition: "color 0.12s",
       }}
       onMouseEnter={(event) => { event.currentTarget.style.color = "var(--text)"; }}
-      onMouseLeave={(event) => { event.currentTarget.style.color = "var(--text-muted)"; }}
+      onMouseLeave={(event) => {
+        event.currentTarget.style.color = activeTopPanel === "theme" ? "var(--text)" : "var(--text-muted)";
+      }}
       data-mobile-toolbar-action={mobile ? "theme" : undefined}
     >
-      {preference === "light" ? (
+      {preference === "auto" ? (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+        </svg>
+      ) : !isDark ? (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="5" />
           <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
@@ -1019,15 +1033,9 @@ export function AppShell() {
           <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
           <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
         </svg>
-      ) : preference === "dark" ? (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-        </svg>
       ) : (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <rect x="2" y="3" width="20" height="14" rx="2" />
-          <line x1="8" y1="21" x2="16" y2="21" />
-          <line x1="12" y1="17" x2="12" y2="21" />
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
         </svg>
       )}
     </button>
@@ -1865,6 +1873,64 @@ export function AppShell() {
                       }}
                     >
                       <span>{plugin.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {activeTopPanel === "theme" && (
+                <div
+                  role="menu"
+                  aria-label={translate("theme.label")}
+                  style={{
+                    background: "var(--bg-panel)",
+                    borderLeft: "1px solid var(--border)",
+                    borderRight: "1px solid var(--border)",
+                    borderBottom: "1px solid var(--border)",
+                    overflow: "hidden",
+                    padding: 4,
+                  }}
+                >
+                  {THEME_OPTIONS.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={(event) => {
+                        setTheme(option.id, { x: event.clientX, y: event.clientY });
+                        setActiveTopPanel(null);
+                      }}
+                      role="menuitemradio"
+                      aria-checked={preference === option.id}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 9,
+                        width: "100%", height: 36, padding: "0 10px",
+                        border: "none", borderRadius: 4,
+                        background: preference === option.id ? "var(--bg-selected)" : "transparent",
+                        color: "var(--text)", cursor: "pointer", textAlign: "left", fontSize: 12,
+                        transition: "background 0.1s",
+                      }}
+                      onMouseEnter={(event) => {
+                        if (preference !== option.id) event.currentTarget.style.background = "var(--bg-hover)";
+                      }}
+                      onMouseLeave={(event) => {
+                        if (preference !== option.id) event.currentTarget.style.background = "transparent";
+                      }}
+                    >
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          display: "inline-flex", width: 22, height: 14, overflow: "hidden",
+                          border: "1px solid var(--border)", borderRadius: 4, flexShrink: 0,
+                        }}
+                      >
+                        <span style={{ width: "50%", background: option.colors[0] }} />
+                        <span style={{ width: "50%", background: option.colors[1] }} />
+                      </span>
+                      <span style={{ flex: 1 }}>
+                        {option.label.startsWith("theme.") ? translate(option.label) : option.label}
+                      </span>
+                      <span aria-hidden="true" style={{ width: 14, color: "var(--accent)", fontWeight: 700 }}>
+                        {preference === option.id ? "✓" : ""}
+                      </span>
                     </button>
                   ))}
                 </div>
