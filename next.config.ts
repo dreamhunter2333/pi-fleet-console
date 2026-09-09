@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
   output: staticExport ? "export" : "standalone",
   outputFileTracingRoot: configDir,
   serverExternalPackages: [
+    "node-pty",
     "undici",
     "web-push",
     "@earendil-works/pi-coding-agent",

@@ -2,7 +2,7 @@ FROM oven/bun:1-slim AS dependencies
 
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN bun install --no-save
+RUN bun install --no-save --ignore-scripts
 
 FROM oven/bun:1-slim AS builder
 

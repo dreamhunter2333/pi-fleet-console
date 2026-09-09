@@ -1,6 +1,7 @@
 "use client";
 
 const MACHINE_HEADER = "X-Pi-Machine";
+let activeMachineId: string | null = null;
 
 function shouldRouteThroughFleet(input: RequestInfo | URL): boolean {
   const raw = input instanceof Request ? input.url : String(input);
@@ -23,7 +24,13 @@ function fleetEventSourceUrl(input: string | URL, machineId: string): URL {
   return url;
 }
 
+export function fleetResourceUrl(input: string): string {
+  if (!activeMachineId || !shouldRouteThroughFleet(input)) return input;
+  return fleetEventSourceUrl(input, activeMachineId).toString();
+}
+
 export function installFleetTransport(machineId: string): () => void {
+  activeMachineId = machineId;
   const originalFetch = window.fetch.bind(window);
   const originalEventSource = window.EventSource;
   const originalOpen = window.open.bind(window);
@@ -64,6 +71,7 @@ export function installFleetTransport(machineId: string): () => void {
   document.addEventListener("click", interceptApiDownload, true);
 
   return () => {
+    activeMachineId = null;
     window.fetch = originalFetch;
     window.EventSource = originalEventSource;
     window.open = originalOpen;

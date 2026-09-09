@@ -180,14 +180,13 @@ function M.select()
     local machine_id
     local events_prefix = "/api/fleet/events/"
     if ngx.var.uri:sub(1, #events_prefix) == events_prefix then
-        local events_path = ngx.var.uri:sub(#events_prefix + 1)
+        local events_path = request_uri:sub(#events_prefix + 1)
         local separator = events_path:find("/", 1, true)
         if not separator then
             return respond(ngx.HTTP_BAD_REQUEST, { error = "Invalid fleet event path" })
         end
-        machine_id = events_path:sub(1, separator - 1)
+        machine_id = ngx.unescape_uri(events_path:sub(1, separator - 1))
         request_uri = "/api" .. events_path:sub(separator)
-        if ngx.var.args then request_uri = request_uri .. "?" .. ngx.var.args end
     else
         machine_id = ngx.req.get_headers()["x-pi-machine"]
     end
