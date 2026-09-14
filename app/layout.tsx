@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Mono } from "next/font/google";
 import { PwaRegistration } from "@/components/PwaRegistration";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 import "./settings.css";
@@ -62,7 +63,7 @@ export default function RootLayout({
         <meta name="google" content="notranslate" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("pi-theme");var d=window.matchMedia("(prefers-color-scheme: dark)").matches;var m={light:"default-light",dark:"default-dark"};t=m[t]||t;if(!/^(default|github|one-half)-(light|dark)$/.test(t||""))t=d?"default-dark":"default-light";document.documentElement.dataset.theme=t;document.documentElement.classList.toggle("dark",t.endsWith("-dark"));var c={"default-light":"#ffffff","default-dark":"#1a1a1a","github-light":"#ffffff","github-dark":"#0d1117","one-half-light":"#fafafa","one-half-dark":"#282c34"}[t];document.querySelector('meta[name="theme-color"]')?.setAttribute("content",c)}catch(e){}})();`,
+            __html: THEME_INIT_SCRIPT,
           }}
         />
       </head>

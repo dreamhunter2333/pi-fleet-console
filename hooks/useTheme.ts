@@ -1,51 +1,19 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
+import { isDarkTheme, isThemePreference, type ThemePreference, type ResolvedTheme } from "@/lib/theme";
 
-export type ThemeId = "default-light" | "default-dark" | "github-light" | "github-dark" | "one-half-light" | "one-half-dark";
-export type ThemePreference = "light" | "dark" | "auto" | Exclude<ThemeId, "default-light" | "default-dark">;
-
-export const THEME_OPTIONS: ReadonlyArray<{
-  id: ThemePreference;
-  label: string;
-  colors: readonly [string, string];
-}> = [
-  { id: "auto", label: "theme.auto", colors: ["#ffffff", "#1a1a1a"] },
-  { id: "light", label: "theme.light", colors: ["#ffffff", "#2563eb"] },
-  { id: "dark", label: "theme.dark", colors: ["#1a1a1a", "#60a5fa"] },
-  { id: "github-light", label: "GitHub Light", colors: ["#ffffff", "#0969da"] },
-  { id: "github-dark", label: "GitHub Dark", colors: ["#0d1117", "#2f81f7"] },
-  { id: "one-half-light", label: "One Half Light", colors: ["#fafafa", "#0184bc"] },
-  { id: "one-half-dark", label: "One Half Dark", colors: ["#282c34", "#61afef"] },
-];
+export type { ThemePreference, ResolvedTheme } from "@/lib/theme";
 
 type ThemeState = {
   preference: ThemePreference;
-  theme: ThemeId;
+  theme: ResolvedTheme;
 };
 
 type ToggleOrigin = { x: number; y: number };
 
 const STORAGE_KEY = "pi-theme";
-const DARK_THEMES = new Set<ThemeId>(["default-dark", "github-dark", "one-half-dark"]);
-const THEME_COLORS: Record<ThemeId, string> = {
-  "default-light": "#ffffff",
-  "default-dark": "#1a1a1a",
-  "github-light": "#ffffff",
-  "github-dark": "#0d1117",
-  "one-half-light": "#fafafa",
-  "one-half-dark": "#282c34",
-};
-const THEME_PREFERENCES = new Set<ThemePreference>([
-  "light",
-  "dark",
-  "auto",
-  "github-light",
-  "github-dark",
-  "one-half-light",
-  "one-half-dark",
-]);
-const SERVER_SNAPSHOT: ThemeState = { preference: "auto", theme: "default-light" };
+const SERVER_SNAPSHOT: ThemeState = { preference: "auto", theme: "light" };
 
 const listeners = new Set<() => void>();
 let state: ThemeState | null = null;
@@ -55,9 +23,9 @@ function emit(): void {
   listeners.forEach((cb) => cb());
 }
 
-function getSystemTheme(): ThemeId {
-  if (typeof window === "undefined") return "default-light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "default-dark" : "default-light";
+function getSystemTheme(): ResolvedTheme {
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 function readStoredPreference(): ThemePreference {
@@ -65,25 +33,21 @@ function readStoredPreference(): ThemePreference {
     const value = localStorage.getItem(STORAGE_KEY);
     if (value === "default-light") return "light";
     if (value === "default-dark") return "dark";
-    if (THEME_PREFERENCES.has(value as ThemePreference)) return value as ThemePreference;
+    if (isThemePreference(value)) return value;
   } catch {
     // ignore storage errors (private mode, quota, etc.)
   }
   return "auto";
 }
 
-function resolveTheme(preference: ThemePreference): ThemeId {
-  if (preference === "auto") return getSystemTheme();
-  if (preference === "light") return "default-light";
-  if (preference === "dark") return "default-dark";
-  return preference;
+function resolveTheme(preference: ThemePreference): ResolvedTheme {
+  return preference === "auto" ? getSystemTheme() : preference;
 }
 
-function applyDomTheme(theme: ThemeId): void {
+function applyDomTheme(theme: ResolvedTheme): void {
   if (typeof document === "undefined") return;
   document.documentElement.dataset.theme = theme;
-  document.documentElement.classList.toggle("dark", DARK_THEMES.has(theme));
-  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", THEME_COLORS[theme]);
+  document.documentElement.classList.toggle("dark", isDarkTheme(theme));
 }
 
 function ensureState(): ThemeState {
@@ -97,7 +61,7 @@ function ensureState(): ThemeState {
   return state;
 }
 
-function setThemeState(preference: ThemePreference, theme: ThemeId, persist: boolean): void {
+function setThemeState(preference: ThemePreference, theme: ResolvedTheme, persist: boolean): void {
   applyDomTheme(theme);
   if (persist) {
     try {
@@ -123,6 +87,7 @@ function ensureSystemListener(): void {
 
   const mql = window.matchMedia("(prefers-color-scheme: dark)");
   mql.addEventListener("change", syncAutoThemeFromSystem);
+  // Some browsers delay or miss scheme events while backgrounded.
   window.addEventListener("focus", syncAutoThemeFromSystem);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") syncAutoThemeFromSystem();
@@ -159,6 +124,7 @@ export function useTheme() {
     const apply = () => {
       setThemeState(nextPreference, nextTheme, true);
     };
+
     const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const supportsVT = typeof document.startViewTransition === "function";
 
@@ -200,7 +166,6 @@ export function useTheme() {
     theme: snapshot.theme,
     preference: snapshot.preference,
     setThemePreference,
-    setTheme: setThemePreference,
-    isDark: DARK_THEMES.has(snapshot.theme),
+    isDark: isDarkTheme(snapshot.theme),
   };
 }
