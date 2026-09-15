@@ -12,6 +12,7 @@ import { formatRelativeTime } from "@/lib/i18n/format";
 import { useI18n } from "@/hooks/useI18n";
 import { DirectoryPicker } from "./DirectoryPicker";
 import { FileExplorer, type FileExplorerHandle } from "./FileExplorer";
+import { MachineSelector } from "./MachineSelector";
 import { SessionSearch } from "./SessionSearch";
 
 // Fixed row height for the session list. SessionItem renders at exactly this
@@ -1093,6 +1094,8 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
             </button>
           </div>
         </div>
+
+        <MachineSelector />
 
         {/* CWD picker */}
         <div ref={dropdownRef} style={{ position: "relative" }}>
