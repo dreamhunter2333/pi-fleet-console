@@ -1,0 +1,13 @@
+{
+  "name": "pi-fleet-agent-build",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun ../scripts/build-agent.mts",
+    "test": "node --experimental-strip-types --test agent.test.mts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "bun-types": "1.4.4"
+  }
+}
