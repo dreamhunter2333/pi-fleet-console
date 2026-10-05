@@ -1,0 +1,70 @@
+name: API binaries
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            target: bun-linux-x64-baseline
+            asset: linux-x64
+          - runner: macos-15
+            target: bun-darwin-arm64
+            asset: darwin-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.22.1"
+          cache: npm
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.4"
+      - run: npm ci --ignore-scripts
+      - run: npm run typecheck:agent
+      - run: npm run build:agent
+        env:
+          PI_FLEET_COMPILE_TARGET: ${{ matrix.target }}
+      - run: npm run test:agent
+      - name: Prepare binary and checksum
+        env:
+          ASSET: pi-fleet-agent-${{ matrix.asset }}
+        run: |
+          mv build/pi-fleet-agent "build/$ASSET"
+          cd build
+          shasum -a 256 "$ASSET" > "$ASSET.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pi-fleet-agent-${{ matrix.asset }}
+          path: build/pi-fleet-agent-*
+          if-no-files-found: error
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pi-fleet-agent-*
+          merge-multiple: true
+          path: release
+      - name: Attach binaries to the prepared release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release upload "$GITHUB_REF_NAME" release/* --clobber
