@@ -1,5 +1,6 @@
 import { buildAtMentionText } from "./file-fuzzy";
 import { encodeFilePathForApi } from "./file-paths";
+import { fleetResourceUrl } from "./fleet-client";
 
 /** Browser side of `POST /api/files/[...path]?type=upload`; mirrors `lib/file-upload.ts`. */
 export type UploadConflictStrategy = "error" | "overwrite" | "skip";
@@ -39,7 +40,7 @@ export function uploadFiles(
     const xhr = new XMLHttpRequest();
     xhr.open(
       "POST",
-      `/api/files/${encodeFilePathForApi(targetDirectory)}?type=upload&conflict=${strategy}`,
+      fleetResourceUrl(`/api/files/${encodeFilePathForApi(targetDirectory)}?type=upload&conflict=${strategy}`),
     );
     xhr.upload.onprogress = (event) => {
       if (onProgress && event.lengthComputable && event.total > 0) {
