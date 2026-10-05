@@ -32,7 +32,7 @@ const SDK_MODULES = {
   configValues: "dist/core/resolve-config-value.js",
 } as const;
 
-type SdkModuleName = keyof typeof SDK_MODULES | "mcpClient";
+type SdkModuleName = keyof typeof SDK_MODULES | "mcpClient" | "mcpClientOAuth";
 type MemberKind = "class" | "function";
 
 const MEMBERS = {
@@ -47,7 +47,7 @@ const MEMBERS = {
   getMcpToolExposure: { module: "mcpServers", kind: "function" },
   signInMcpServer: { module: "mcpOAuth", kind: "function" },
   McpOAuthCredentialStore: { module: "mcpOAuth", kind: "class" },
-  McpSignInCancelledError: { module: "mcpOAuth", kind: "class" },
+  McpSignInCancelledError: { module: "mcpClientOAuth", kind: "class" },
   resolveConfigValueOrThrow: { module: "configValues", kind: "function" },
   resolveHeadersOrThrow: { module: "configValues", kind: "function" },
   getConfigValueEnvVarNames: { module: "configValues", kind: "function" },
@@ -64,7 +64,7 @@ export type McpOAuthCredentialStore = NonNullable<McpExtensionOptions["credentia
 export type McpOAuthServerStore = ReturnType<McpOAuthCredentialStore["forServer"]>;
 
 /** pi-mcp's `McpOAuthStateStore`, which sign-in reads and writes. */
-export type McpOAuthStateStore = Pick<McpOAuthServerStore, "load" | "save">;
+export type McpOAuthStateStore = Pick<McpOAuthServerStore, "load" | "save" | "withRefreshLock">;
 
 /** pi-mcp's `StdioTransportOptions`. */
 export interface StdioTransportOptions {
@@ -316,6 +316,7 @@ async function importSdkModules(packageDir: string): Promise<LoadedModules | str
   ) as Record<SdkModuleName, string>;
   try {
     paths.mcpClient = resolveMcpClientEntry(packageDir);
+    paths.mcpClientOAuth = join(paths.mcpClient, "..", "oauth/index.js");
   } catch (error) {
     return `${MCP_PACKAGE}: ${errorMessage(error)}`;
   }
@@ -335,7 +336,7 @@ function sdkMembers(modules: LoadedModules): Record<string, unknown> | string {
   for (const [name, { module, kind }] of Object.entries(MEMBERS)) {
     const value = modules[module][name];
     if (kind === "class" ? !isClass(value) : typeof value !== "function") {
-      const path = module === "mcpClient" ? MCP_PACKAGE : SDK_MODULES[module];
+      const path = { ...SDK_MODULES, mcpClient: MCP_PACKAGE, mcpClientOAuth: `${MCP_PACKAGE}/oauth` }[module];
       return `${path} does not export ${name} as a ${kind}`;
     }
     members[name] = value;
