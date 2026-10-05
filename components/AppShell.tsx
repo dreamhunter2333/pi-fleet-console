@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect, useLayoutEffect, useMemo } fr
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGlobalKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { SessionSidebar, type SelectSessionOptions, type SessionSidebarControl } from "./SessionSidebar";
+import { FleetProvider, useFleet } from "@/hooks/useFleet";
 import { ChatWindow } from "./ChatWindow";
 import { NewSessionContextBar, type NewSessionContextControl } from "./NewSessionContextBar";
 import type { ChatScrollPosition } from "@/lib/chat-scroll-position";
@@ -100,6 +101,16 @@ function lastAgentTabId(tabs: readonly { sessionId: string }[]): string | null {
 }
 
 export function AppShell() {
+  return (
+    <FleetProvider>
+      <AppShellContent />
+    </FleetProvider>
+  );
+}
+
+function AppShellContent() {
+  const { selectedMachine } = useFleet();
+  const terminalTabsKey = `${TERMINAL_TABS_KEY}:${selectedMachine?.id}`;
   const router = useRouter();
   const searchParams = useSearchParams();
   const [initialNavigation, setInitialNavigation] = useState(() => getInitialNavigation(searchParams));
@@ -552,7 +563,7 @@ export function AppShell() {
 
   useEffect(() => {
     try {
-      const saved = restoreTerminalTabs(window.sessionStorage.getItem(TERMINAL_TABS_KEY));
+      const saved = restoreTerminalTabs(window.sessionStorage.getItem(terminalTabsKey));
       setTerminalTabs(saved.tabs);
       if (saved.activeId) {
         setActiveFileTabId(saved.activeId);
@@ -560,18 +571,18 @@ export function AppShell() {
       }
     } catch { /* storage is optional */ }
     setTerminalsRestored(true);
-  }, []);
+  }, [terminalTabsKey]);
 
   useEffect(() => {
     if (!terminalsRestored) return;
     try {
-      window.sessionStorage.setItem(TERMINAL_TABS_KEY, JSON.stringify({
+      window.sessionStorage.setItem(terminalTabsKey, JSON.stringify({
         tabs: terminalTabs.map(({ id, cwd }) => ({ id, cwd })),
         activeId: activeFileTabId,
         open: rightPanelOpen,
       }));
     } catch { /* storage is optional */ }
-  }, [terminalTabs, activeFileTabId, rightPanelOpen, terminalsRestored]);
+  }, [terminalTabs, activeFileTabId, rightPanelOpen, terminalsRestored, terminalTabsKey]);
 
   const handleFileViewerStateChange = useCallback((
     generation: number,
