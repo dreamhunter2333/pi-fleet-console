@@ -16,6 +16,10 @@ export const THEME_OPTIONS = [
   { id: "contrast-light", label: "settings.themeContrastLight", scheme: "light" },
   { id: "contrast-dark", label: "settings.themeContrastDark", scheme: "dark" },
   { id: "zenburn", label: "settings.themeZenburn", scheme: "dark" },
+  { id: "github-light", label: "GitHub Light", scheme: "light" },
+  { id: "github-dark", label: "GitHub Dark", scheme: "dark" },
+  { id: "one-half-light", label: "One Half Light", scheme: "light" },
+  { id: "one-half-dark", label: "One Half Dark", scheme: "dark" },
 ] as const;
 
 export type ThemePreference = (typeof THEME_OPTIONS)[number]["id"];
