@@ -88,6 +88,7 @@ import { archiveViewState, filesFoldState, useSidebarMotion } from "@/hooks/useS
 import { DirectoryPicker } from "./DirectoryPicker";
 import { DismissButton } from "./DismissButton";
 import { FileExplorer, type FileExplorerHandle } from "./FileExplorer";
+import { MachineSelector } from "./MachineSelector";
 import { PiWebTitle } from "./PiWebTitle";
 import { ProjectWorktreePicker, type ProjectWorktreePickerHandle, type WorktreeRemoval } from "./ProjectWorktreePicker";
 import { SessionSearch } from "./SessionSearch";
@@ -2835,6 +2836,10 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
           onSelect={(path) => void commitCustomPath(path)}
         />
       )}
+      <div style={{ padding: "8px 10px 0", flexShrink: 0 }}>
+        <MachineSelector />
+      </div>
+
       {/* One toolbar row, in the cells of the chat's top bar beside it (its
           line continues that bar's): Sessions | Files, then New and the
           search of the tab in view. Only the two tabs are the tablist. With

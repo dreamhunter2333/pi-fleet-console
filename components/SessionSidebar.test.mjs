@@ -1,11 +1,18 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
 import ts from "typescript";
 import vm from "node:vm";
 
-const jiti = createJiti(import.meta.url, { jsx: { runtime: "automatic" }, tsconfigPaths: true });
+const jiti = createJiti(import.meta.url, {
+  jsx: { runtime: "automatic" },
+  tsconfigPaths: true,
+  alias: {
+    [fileURLToPath(new URL("../hooks/useFleet", import.meta.url))]: fileURLToPath(new URL("./__fixtures__/fleet.mjs", import.meta.url)),
+  },
+});
 const React = await jiti.import("react");
 const { renderToStaticMarkup } = await jiti.import("react-dom/server");
 const { I18nProvider } = await jiti.import("@/hooks/useI18n");

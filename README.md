@@ -167,6 +167,12 @@ file. Provider errors fail safe by preserving that session. This lease only
 affects automatic idle eviction; explicit shutdown and Stop fallback cleanup
 still take precedence.
 
+## API-only agent
+
+The [Fleet API agent](agent/README.md) builds the existing backend
+into a standalone executable for a Fleet-managed host. The normal Pi Web launch
+and container workflows remain available.
+
 ## Development
 
 ```bash

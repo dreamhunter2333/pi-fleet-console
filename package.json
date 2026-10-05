@@ -45,7 +45,10 @@
     "test:terminal": "node e2e/terminal.mjs",
     "test:e2e": "node e2e/run.mjs",
     "test": "node --experimental-strip-types --test \"app/**/*.test.mjs\" \"components/**/*.test.mjs\" \"hooks/**/*.test.mjs\" \"lib/**/*.test.mjs\" \"public/**/*.test.mjs\"",
-    "release": "npm version patch -m \"Release v%s\""
+    "release": "npm version patch -m \"Release v%s\"",
+    "build:agent": "bun scripts/build-agent.mts",
+    "test:agent": "node --experimental-strip-types --test agent/agent.test.mts",
+    "typecheck:agent": "tsc -p agent/tsconfig.json --noEmit"
   },
   "dependencies": {
     "@earendil-works/pi-agent-core": "1.4.0",
@@ -58,7 +61,7 @@
     "@xterm/addon-fit": "0.11.0",
     "@xterm/xterm": "6.0.0",
     "js-yaml": "^5.2.3",
-    "next": "16.3.8",
+    "next": "16.4.3",
     "node-pty": "1.2.0-beta.15",
     "proper-lockfile": "4.1.2",
     "react": "^19.2.4",
@@ -79,6 +82,7 @@
     "@types/semver": "7.8.0",
     "@types/web-push": "^3.6.4",
     "ansi_up": "^6.0.6",
+    "bun-types": "1.4.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "jiti": "^2.7.0",
