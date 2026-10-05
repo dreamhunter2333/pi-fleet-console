@@ -33,6 +33,13 @@ export function shouldUseVisualViewportHeight({
   return innerHeight / scale - viewportHeight > KEYBOARD_MIN_HEIGHT_PX;
 }
 
+export function getAppViewportHeight(state: ViewportHeightState, isIosStandalone: boolean): number | null {
+  if (shouldUseVisualViewportHeight(state)) return state.viewportHeight;
+  if (!isIosStandalone) return null;
+  const scale = state.viewportScale > 0 ? state.viewportScale : 1;
+  return Math.min(state.innerHeight, state.viewportHeight * scale);
+}
+
 function hasFocusedEditableElement(): boolean {
   const activeElement = document.activeElement;
   if (!(activeElement instanceof HTMLElement)) return false;
@@ -61,25 +68,32 @@ export function useViewportHeight(): void {
     if (!viewport) return;
 
     const root = document.documentElement;
+    const isIosStandalone = root.dataset.standalone === "true"
+      && CSS.supports("-webkit-touch-callout", "none");
     let frameId: number | null = null;
     const settleTimers = new Set<number>();
     let settleChainRunning = false;
 
     const update = () => {
       frameId = null;
-      const keyboardOpen = shouldUseVisualViewportHeight({
+      const state = {
         hasFocusedEditable: hasFocusedEditableElement(),
         innerHeight: window.innerHeight,
         viewportHeight: viewport.height,
         viewportScale: viewport.scale,
-      });
+      };
+      const keyboardOpen = shouldUseVisualViewportHeight(state);
+      const appHeight = getAppViewportHeight(state, isIosStandalone);
+      if (appHeight !== null) {
+        root.style.setProperty("--app-viewport-height", `${appHeight}px`);
+      } else {
+        root.style.removeProperty("--app-viewport-height");
+      }
       if (keyboardOpen) {
-        root.style.setProperty("--app-viewport-height", `${viewport.height}px`);
         // CSS collapses secondary composer chrome while typing so the few
         // hundred pixels above the keyboard go to the conversation.
         root.dataset.keyboardOpen = "true";
       } else {
-        root.style.removeProperty("--app-viewport-height");
         delete root.dataset.keyboardOpen;
       }
 
