@@ -384,6 +384,7 @@ function watchedStore(store: McpOAuthStateStore, flow: Flow, guard: McpSignInWri
       note(state);
       await store.save(state);
     },
+    withRefreshLock: (fn) => store.withRefreshLock(fn),
   };
 }
 
