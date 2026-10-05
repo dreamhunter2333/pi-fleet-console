@@ -206,3 +206,5 @@ See [AGENTS.md](./AGENTS.md) for the architecture notes and detailed file map.
 ## License
 
 [MIT](./LICENSE)
+
+Fleet-specific build and deployment: [Fleet](fleet/README.md).

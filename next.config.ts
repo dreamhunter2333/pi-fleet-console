@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withFleetConfig } from "./bin/fleet-config.mjs";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
@@ -107,4 +108,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withFleetConfig(nextConfig);

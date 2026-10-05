@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Mono } from "next/font/google";
-import { PwaRegistration } from "@/components/PwaRegistration";
-import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import { PwaRegistration } from "@/fleet/PwaRegistration";
+import { THEME_INIT_SCRIPT, withFleetMetadata, withFleetViewport } from "@/fleet/platform";
+import { FleetPlatform } from "@/fleet/FleetPlatform";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 import "./settings.css";
 import "./sidebar.css";
 import "./sidebar-menu.css";
+import "./fleet-themes.css";
 
 const notoSansMono = Noto_Sans_Mono({
   subsets: ["latin", "cyrillic"],
@@ -14,7 +16,7 @@ const notoSansMono = Noto_Sans_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withFleetMetadata({
   title: "Pi Web",
   description: "Pi Web interface for the pi coding agent",
   applicationName: "Pi Web",
@@ -43,9 +45,9 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-};
+});
 
-export const viewport: Viewport = {
+export const viewport: Viewport = withFleetViewport({
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -54,7 +56,7 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#1a1a1a" },
   ],
-};
+});
 
 export default function RootLayout({
   children,
@@ -74,6 +76,7 @@ export default function RootLayout({
       <body translate="no" className="notranslate" suppressHydrationWarning>
         {children}
         <PwaRegistration />
+        <FleetPlatform />
       </body>
     </html>
   );
