@@ -7,6 +7,7 @@ import "./globals.css";
 import "./settings.css";
 import "./sidebar.css";
 import "./sidebar-menu.css";
+import "./fleet-themes.css";
 
 const notoSansMono = Noto_Sans_Mono({
   subsets: ["latin", "cyrillic"],
@@ -37,7 +38,6 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
     title: "Pi Web",
   },
   formatDetection: {
@@ -50,10 +50,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   interactiveWidget: "resizes-content",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a1a1a" },
-  ],
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -67,11 +64,17 @@ export default function RootLayout({
         <meta name="google" content="notranslate" />
         <script
           dangerouslySetInnerHTML={{
+            __html: 'if(navigator.standalone||window.matchMedia("(display-mode: standalone)").matches)document.documentElement.dataset.standalone="true";',
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
             __html: THEME_INIT_SCRIPT,
           }}
         />
       </head>
       <body translate="no" className="notranslate" suppressHydrationWarning>
+        <div className="ios-pwa-status-strip" aria-hidden="true" />
         {children}
         <PwaRegistration />
       </body>

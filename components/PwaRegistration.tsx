@@ -9,7 +9,7 @@ export function PwaRegistration() {
     }
 
     const register = () => {
-      const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? "dev";
+      const appVersion = process.env.NEXT_PUBLIC_FLEET_VERSION ?? process.env.NEXT_PUBLIC_APP_VERSION ?? "dev";
       const scriptUrl = `/sw.js?v=${encodeURIComponent(appVersion)}`;
 
       void navigator.serviceWorker.register(scriptUrl, {
