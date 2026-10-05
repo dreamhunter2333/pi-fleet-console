@@ -161,3 +161,5 @@ See [AGENTS.md](./AGENTS.md) for the architecture notes, API routes and topic no
 ## License
 
 [MIT](./LICENSE)
+
+Fleet-specific build and deployment: [Fleet](fleet/README.md).
