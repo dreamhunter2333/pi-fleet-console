@@ -15,6 +15,7 @@ const jiti = createJiti(import.meta.url, {
   jsx: { runtime: "automatic" },
   tsconfigPaths: true,
   alias: {
+    [fileURLToPath(new URL("../hooks/useFleet", import.meta.url))]: fileURLToPath(new URL("./__fixtures__/fleet.mjs", import.meta.url)),
     [fileURLToPath(new URL("../hooks/useFilesPlacement", import.meta.url))]: fileURLToPath(new URL("./__fixtures__/files-placement-tab.mjs", import.meta.url)),
   },
 });

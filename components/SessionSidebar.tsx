@@ -80,6 +80,7 @@ import { archiveViewState, filesFoldState, useSidebarMotion } from "@/hooks/useS
 import { DirectoryPicker } from "./DirectoryPicker";
 import { DismissButton } from "./DismissButton";
 import { FileExplorer, type FileExplorerHandle } from "./FileExplorer";
+import { MachineSelector } from "./MachineSelector";
 import { PiWebTitle } from "./PiWebTitle";
 import { ProjectWorktreePicker, type ProjectWorktreePickerHandle, type WorktreeRemoval } from "./ProjectWorktreePicker";
 import { SessionSearch } from "./SessionSearch";
@@ -2626,6 +2627,10 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
         >
           <SearchIcon size={16} />
         </button>
+      </div>
+
+      <div style={{ padding: "4px 10px 0", flexShrink: 0 }}>
+        <MachineSelector />
       </div>
 
       {/* Sessions: every project's sessions, or the archive. A tab's panel,
