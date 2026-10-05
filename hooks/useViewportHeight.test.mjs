@@ -3,7 +3,25 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url);
-const { shouldUseVisualViewportHeight } = await jiti.import("./useViewportHeight.ts");
+const { shouldUseVisualViewportHeight, getAppViewportHeight } = await jiti.import("./useViewportHeight.ts");
+
+test("fits the iOS standalone content area without treating the status bar as a keyboard", () => {
+  const state = { hasFocusedEditable: false, innerHeight: 852, viewportHeight: 793, viewportScale: 1 };
+  assert.equal(shouldUseVisualViewportHeight(state), false);
+  assert.equal(getAppViewportHeight(state, true), 793);
+  assert.equal(getAppViewportHeight({ ...state, hasFocusedEditable: true }, true), 793);
+  assert.equal(getAppViewportHeight(state, false), null);
+});
+
+test("standalone height follows rotation and keyboard dismissal without shrinking on pinch zoom", () => {
+  const state = { hasFocusedEditable: false, innerHeight: 793, viewportHeight: 793, viewportScale: 1 };
+  assert.equal(getAppViewportHeight(state, true), 793);
+  assert.equal(getAppViewportHeight({ ...state, innerHeight: 390, viewportHeight: 390 }, true), 390);
+  assert.equal(getAppViewportHeight({ ...state, viewportHeight: 396.5, viewportScale: 2 }, true), 793);
+  assert.equal(getAppViewportHeight({ ...state, hasFocusedEditable: true, viewportHeight: 450 }, true), 450);
+  assert.equal(getAppViewportHeight({ ...state, hasFocusedEditable: true, viewportHeight: 450 }, false), 450);
+  assert.equal(getAppViewportHeight(state, true), 793);
+});
 
 test("uses the visual viewport for a focused editor when the keyboard shrinks it", () => {
   assert.equal(shouldUseVisualViewportHeight({
