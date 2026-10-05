@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["bun-types", "node"],
+    "allowImportingTsExtensions": true,
+    "incremental": false
+  },
+  "include": ["./*.mts", "../scripts/build-agent.mts"],
+  "exclude": ["../node_modules"]
+}
