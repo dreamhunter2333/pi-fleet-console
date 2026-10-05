@@ -20,6 +20,7 @@ const jiti = createJiti(import.meta.url, {
   tsconfigPaths: true,
   alias: {
     [placementHook]: fileURLToPath(new URL("./__fixtures__/files-placement-tab.mjs", import.meta.url)),
+    [fileURLToPath(new URL("../hooks/useFleet", import.meta.url))]: fileURLToPath(new URL("./__fixtures__/fleet.mjs", import.meta.url)),
   },
 });
 const React = await jiti.import("react");
@@ -60,9 +61,9 @@ test("the fixture stands in for the whole hook module", async () => {
   assert.equal(fixture.useFilesPlacement(), "tab");
 });
 
-test("the tabs layout renders its tabs, no brand and no files section header", () => {
+test("the machine chooser precedes the tabs, with no brand or files section header", () => {
   const html = render({ selectedCwd: "/work/alpha", onOpenTerminal: noop });
-  assert.match(html, /^<div class="session-sidebar" style="--sidebar-files-height:320px"><div class="sidebar-header"><div class="sidebar-tabs-list" role="tablist" aria-label="Sidebar view">/);
+  assert.match(html, /^<div class="session-sidebar" style="--sidebar-files-height:320px">.*Select machine….*<div class="sidebar-header"><div class="sidebar-tabs-list" role="tablist" aria-label="Sidebar view">/);
   assert.equal((html.match(/role="tab"/g) ?? []).length, 2);
   assert.doesNotMatch(html, /sidebar-brand|sidebar-files-section|sidebar-files-keys|sidebar-files-changes|is-files-below/);
   // Both panels are tab panels; the files' is hidden behind its tab.

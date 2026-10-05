@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dreamhunter2333/pi-fleet-console/blob/main/gateway/machines.schema.json",
+  "title": "Pi Fleet machine configuration",
+  "type": "object",
+  "required": ["machines"],
+  "properties": {
+    "machines": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/machine"
+      }
+    }
+  },
+  "$defs": {
+    "machine": {
+      "type": "object",
+      "required": ["id", "name", "api"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "api": {
+          "type": "object",
+          "required": ["url"],
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https?://"
+            },
+            "headers": {
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[!#$%&'*+.^_`|~0-9A-Za-z-]+$"
+              },
+              "additionalProperties": {
+                "type": "string",
+                "pattern": "^[^\\r\\n]*$"
+              },
+              "default": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

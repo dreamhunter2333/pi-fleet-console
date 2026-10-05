@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
-import { isDarkTheme, isThemePreference, type ThemePreference, type ResolvedTheme } from "@/lib/theme";
+import { THEME_COLORS, isDarkTheme, isThemePreference, type ThemePreference, type ResolvedTheme } from "@/lib/theme";
 
 export type { ThemePreference, ResolvedTheme } from "@/lib/theme";
 
@@ -31,6 +31,8 @@ function getSystemTheme(): ResolvedTheme {
 function readStoredPreference(): ThemePreference {
   try {
     const value = localStorage.getItem(STORAGE_KEY);
+    if (value === "default-light") return "light";
+    if (value === "default-dark") return "dark";
     if (isThemePreference(value)) return value;
   } catch {
     // ignore storage errors (private mode, quota, etc.)
@@ -46,6 +48,7 @@ function applyDomTheme(theme: ResolvedTheme): void {
   if (typeof document === "undefined") return;
   document.documentElement.dataset.theme = theme;
   document.documentElement.classList.toggle("dark", isDarkTheme(theme));
+  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", THEME_COLORS[theme]);
 }
 
 function ensureState(): ThemeState {
